@@ -1,11 +1,10 @@
 Name:          libwebp
 Version:       1.0.0
-Release:       3
+Release:       4
 URL:           https://webmproject.org/
 Summary:       Library and tools for the WebP graphics format
 License:       BSD
 Source0:       https://downloads.webmproject.org/releases/webp/%{name}-%{version}.tar.gz
-Source1:       libwebp_jni_example.java
 
 BuildRequires: libjpeg-devel libpng-devel giflib-devel libtiff-devel
 BuildRequires: java-devel jpackage-utils swig freeglut-devel
@@ -47,6 +46,7 @@ Java bindings for libwebp.
 
 %prep
 %autosetup -n %{name}-%{version} -p1
+
 %build
 autoreconf -vif
 %ifarch aarch64
@@ -56,7 +56,6 @@ export CFLAGS="%{optflags} -frename-registers"
             --enable-libwebpdecoder --disable-neon
 %make_build
 
-cp %{SOURCE1} .
 cd swig
 rm -rf libwebp.jar libwebp_java_wrap.c
 install -d java/com/google/webp
@@ -102,7 +101,6 @@ cp swig/*.jar swig/*.so %{buildroot}/%{_libdir}/%{name}-java/
 
 %files java
 %defattr(-,root,root)
-%doc *.java
 %{_libdir}/%{name}-java/
 
 %files help
@@ -111,6 +109,9 @@ cp swig/*.jar swig/*.so %{buildroot}/%{_libdir}/%{name}-java/
 %{_mandir}/man*/*
 
 %changelog
+* Sat Jan 11 2020 openEuler Buildteam <buildteam@openeuler.org> - 1.0.0-4
+- delete unused patch
+
 * Wed Sep 11 2019 openEuler Buildteam <buildteam@openeuler.org> - 1.0.0-3
 - Package init
 
