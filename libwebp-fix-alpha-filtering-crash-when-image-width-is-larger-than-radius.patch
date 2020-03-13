@@ -1,0 +1,37 @@
+From 61ff26aeeb87386f2e1ee377d7bbe1f1ef248e3f Mon Sep 17 00:00:00 2001
+From: Pascal Massimino <skal@google.com>
+Date: Fri, 29 Jun 2018 10:15:47 -0700
+Subject: [PATCH] fix alpha-filtering crash when image width is larger than
+ radius
+
+(we also limit radius based on height too, for good measure, although it's not an asan bug)
+
+fixes oss-fuzz issue #9105
+
+Change-Id: Ie0d79dd81480dc4e2b653b7e992e5cdcd3dfa834
+(cherry picked from commit 1344a2e947c749d231141a295327e5b99b444d63)
+---
+ src/utils/quant_levels_dec_utils.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/utils/quant_levels_dec_utils.c b/src/utils/quant_levels_dec_utils.c
+index 3818a78b9..f65b6cdbb 100644
+--- a/src/utils/quant_levels_dec_utils.c
++++ b/src/utils/quant_levels_dec_utils.c
+@@ -261,9 +261,15 @@ static void CleanupParams(SmoothParams* const p) {
+ 
+ int WebPDequantizeLevels(uint8_t* const data, int width, int height, int stride,
+                          int strength) {
+-  const int radius = 4 * strength / 100;
++  int radius = 4 * strength / 100;
++
+   if (strength < 0 || strength > 100) return 0;
+   if (data == NULL || width <= 0 || height <= 0) return 0;  // bad params
++
++  // limit the filter size to not exceed the image dimensions
++  if (2 * radius + 1 > width) radius = (width - 1) >> 1;
++  if (2 * radius + 1 > height) radius = (height - 1) >> 1;
++
+   if (radius > 0) {
+     SmoothParams p;
+     memset(&p, 0, sizeof(p));

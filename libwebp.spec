@@ -1,10 +1,25 @@
 Name:          libwebp
 Version:       1.0.0
-Release:       4
+Release:       5
 URL:           https://webmproject.org/
 Summary:       Library and tools for the WebP graphics format
 License:       BSD
 Source0:       https://downloads.webmproject.org/releases/webp/%{name}-%{version}.tar.gz
+
+Patch6000:  libwebp-fix-transcode-of-loop-count-to-65535.patch
+Patch6001:  libwebp-fix-invalid-check-for-buffer-size.patch
+Patch6002:  libwebp-Fix-for-thread-race-heap-use-after-free.patch
+Patch6003:  libwebp-fix-riff-size-checks.patch
+Patch6004:  libwebp-ChunkVerifyAndAssign-validate-chunk_size.patch
+Patch6005:  libwebp-fix-alpha-filtering-crash-when-image-width-is-larger-than-radius.patch
+Patch6006:  libwebp-fail-on-multiple-image-chunks.patch
+Patch6007:  libwebp-fix-endian-problems-in-pattern-copy.patch
+Patch6008:  libwebp-Fix-VP8IoTeardownHook-being-called-twice-on-worker-sync-failure.patch
+Patch6009:  libwebp-fix-read-overflow-while-parsing-VP8X-chunk.patch
+Patch6010:  libwebp-Make-sure-partition0-is-read-before-VP8-data-in-IDecode.patch
+Patch6011:  libwebp-fix-rescaling-rounding-inaccuracy.patch
+Patch6012:  libwebp-Allow-for-a-non-initialized-alpha-decompressor-in-DoRemap.patch
+Patch6013:  libwebp-fix-rounding-error.patch
 
 BuildRequires: libjpeg-devel libpng-devel giflib-devel libtiff-devel
 BuildRequires: java-devel jpackage-utils swig freeglut-devel
@@ -109,6 +124,9 @@ cp swig/*.jar swig/*.so %{buildroot}/%{_libdir}/%{name}-java/
 %{_mandir}/man*/*
 
 %changelog
+* Fri Mar 13 2020 openEuler Buildteam <buildteam@openeuler.org> - 1.0.0-5
+- fix fuzz
+
 * Sat Jan 11 2020 openEuler Buildteam <buildteam@openeuler.org> - 1.0.0-4
 - delete unused patch
 

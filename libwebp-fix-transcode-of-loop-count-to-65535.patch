@@ -1,0 +1,104 @@
+From 4b282e13ad0cf7f1a3b4431788bddef1d6b11762 Mon Sep 17 00:00:00 2001
+From: James Zern <jzern@google.com>
+Date: Wed, 9 May 2018 17:36:13 -0700
+Subject: [PATCH] gif2webp: fix transcode of loop count=65535
+
+with loop_compatibility disabled (the default), non-zero loop counts
+will be incremented by 1 for browser rendering compatibility. the max,
+65535, is a special case as the muxer will fail if it is exceeded; avoid
+increasing the limit in this case. this isn't 100% correct, but should
+be close enough given the high number of iterations.
+
+BUG=webp:382
+---
+ examples/anim_diff.c | 14 ++++++++++++--
+ examples/anim_util.c |  2 ++
+ examples/anim_util.h |  6 ++++++
+ examples/gif2webp.c  |  2 +-
+ 4 files changed, 21 insertions(+), 3 deletions(-)
+
+diff --git a/examples/anim_diff.c b/examples/anim_diff.c
+index e74a915..a461ce2 100644
+--- a/examples/anim_diff.c
++++ b/examples/anim_diff.c
+@@ -143,8 +143,18 @@ static int CompareAnimatedImagePair(const AnimatedImage* const img1,
+   if (!ok) return 0;  // These are fatal failures, can't proceed.
+ 
+   if (is_multi_frame_image) {  // Checks relevant for multi-frame images only.
+-    ok = CompareValues(img1->loop_count, img2->loop_count,
+-                       "Loop count mismatch") && ok;
++    int max_loop_count_workaround = 0;
++    // Transcodes to webp increase the gif loop count by 1 for compatibility.
++    // When the gif has the maximum value the webp value will be off by one.
++    if ((img1->format == ANIM_GIF && img1->loop_count == 65536 &&
++         img2->format == ANIM_WEBP && img2->loop_count == 65535) ||
++        (img1->format == ANIM_WEBP && img1->loop_count == 65535 &&
++         img2->format == ANIM_GIF && img2->loop_count == 65536)) {
++      max_loop_count_workaround = 1;
++    }
++    ok = (max_loop_count_workaround ||
++          CompareValues(img1->loop_count, img2->loop_count,
++                        "Loop count mismatch")) && ok;
+     ok = CompareBackgroundColor(img1->bgcolor, img2->bgcolor,
+                                 premultiply) && ok;
+   }
+diff --git a/examples/anim_util.c b/examples/anim_util.c
+index c7a05c7..ee3e332 100644
+--- a/examples/anim_util.c
++++ b/examples/anim_util.c
+@@ -275,6 +275,7 @@ static int ReadAnimatedWebP(const char filename[],
+     prev_frame_timestamp = timestamp;
+   }
+   ok = dump_ok;
++  if (ok) image->format = ANIM_WEBP;
+ 
+  End:
+   WebPAnimDecoderDelete(dec);
+@@ -687,6 +688,7 @@ static int ReadAnimatedGIF(const char filename[], AnimatedImage* const image,
+       }
+     }
+   }
++  image->format = ANIM_GIF;
+   DGifCloseFile(gif, NULL);
+   return 1;
+ }
+diff --git a/examples/anim_util.h b/examples/anim_util.h
+index 8063121..574e032 100644
+--- a/examples/anim_util.h
++++ b/examples/anim_util.h
+@@ -22,6 +22,11 @@
+ extern "C" {
+ #endif
+ 
++typedef enum {
++  ANIM_GIF,
++  ANIM_WEBP
++} AnimatedFileFormat;
++
+ typedef struct {
+   uint8_t* rgba;         // Decoded and reconstructed full frame.
+   int duration;          // Frame duration in milliseconds.
+@@ -29,6 +34,7 @@ typedef struct {
+ } DecodedFrame;
+ 
+ typedef struct {
++  AnimatedFileFormat format;
+   uint32_t canvas_width;
+   uint32_t canvas_height;
+   uint32_t bgcolor;
+diff --git a/examples/gif2webp.c b/examples/gif2webp.c
+index b61f273..caaed7a 100644
+--- a/examples/gif2webp.c
++++ b/examples/gif2webp.c
+@@ -478,7 +478,7 @@ int main(int argc, const char *argv[]) {
+         stored_loop_count = 1;
+         loop_count = 1;
+       }
+-    } else if (loop_count > 0) {
++    } else if (loop_count > 0 && loop_count < 65535) {
+       // adapt GIF's semantic to WebP's (except in the infinite-loop case)
+       loop_count += 1;
+     }
+-- 
+2.19.1
+
