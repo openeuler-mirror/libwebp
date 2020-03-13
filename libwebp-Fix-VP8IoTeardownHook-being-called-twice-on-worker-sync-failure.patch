@@ -1,0 +1,26 @@
+From a14e0f646550f90c22395f613b9dda1c90401266 Mon Sep 17 00:00:00 2001
+From: Yannis Guyon <yguyon@google.com>
+Date: Mon, 2 Jul 2018 13:15:38 +0200
+Subject: [PATCH] Fix VP8IoTeardownHook being called twice on worker sync
+ failure
+
+idec_dec.c, DecodeRemaining: Set decoder state to ERROR to prevent VP8ExitCritical to be called again
+
+Change-Id: Id5f893f45c348e1c529680d930e640f780a73d4c
+(cherry picked from commit 9e729fe19bb60f4ecac357a3d3f5c5c64dd080d2)
+---
+ src/dec/idec_dec.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/dec/idec_dec.c b/src/dec/idec_dec.c
+index 258d15b06..205ca7a5c 100644
+--- a/src/dec/idec_dec.c
++++ b/src/dec/idec_dec.c
+@@ -489,6 +489,7 @@ static VP8StatusCode DecodeRemaining(WebPIDecoder* const idec) {
+   }
+   // Synchronize the thread and check for errors.
+   if (!VP8ExitCritical(dec, io)) {
++    idec->state_ = STATE_ERROR;  // prevent re-entry in IDecError
+     return IDecError(idec, VP8_STATUS_USER_ABORT);
+   }
+   dec->ready_ = 0;

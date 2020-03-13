@@ -1,0 +1,27 @@
+From c0226fd91cbe5fa6fbf5a68dcc9acc9dbe1e358e Mon Sep 17 00:00:00 2001
+From: Pascal Massimino <skal@google.com>
+Date: Sun, 1 Jul 2018 20:01:12 -0700
+Subject: [PATCH] fix read-overflow while parsing VP8X chunk
+
+The available size was not checked before parsing the VP8X data
+
+BUG=oss-fuzz:9100,oss-fuzz:9123
+
+Change-Id: I0143cc4554883c1015e2f084a0e371229e04a8ca
+(cherry picked from commit 95fd65070662e01cc9170c4444f5c0859a710097)
+---
+ src/mux/muxread.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/mux/muxread.c b/src/mux/muxread.c
+index fbe9f0516..ea07dbfd2 100644
+--- a/src/mux/muxread.c
++++ b/src/mux/muxread.c
+@@ -264,6 +264,7 @@ WebPMux* WebPMuxCreateInternal(const WebPData* bitstream, int copy_data,
+         chunk_list = MuxGetChunkListFromId(mux, id);  // List to add this chunk.
+         if (ChunkSetNth(&chunk, chunk_list, 0) != WEBP_MUX_OK) goto Err;
+         if (id == WEBP_CHUNK_VP8X) {  // grab global specs
++          if (data_size < CHUNK_HEADER_SIZE + VP8X_CHUNK_SIZE) goto Err;
+           mux->canvas_width_ = GetLE24(data + 12) + 1;
+           mux->canvas_height_ = GetLE24(data + 15) + 1;
+         }

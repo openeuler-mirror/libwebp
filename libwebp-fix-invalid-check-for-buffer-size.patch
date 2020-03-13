@@ -1,0 +1,27 @@
+From dad31750e374eff8e02fb467eb562d4bf236ed6e Mon Sep 17 00:00:00 2001
+From: Pascal Massimino <pascal.massimino@gmail.com>
+Date: Fri, 25 May 2018 13:25:39 +0200
+Subject: [PATCH] fix invalid check for buffer size
+
+BUG=webp:383
+---
+ src/dec/buffer_dec.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/dec/buffer_dec.c b/src/dec/buffer_dec.c
+index 75eb3c4..3cd94eb 100644
+--- a/src/dec/buffer_dec.c
++++ b/src/dec/buffer_dec.c
+@@ -74,7 +74,8 @@ static VP8StatusCode CheckDecBuffer(const WebPDecBuffer* const buffer) {
+   } else {    // RGB checks
+     const WebPRGBABuffer* const buf = &buffer->u.RGBA;
+     const int stride = abs(buf->stride);
+-    const uint64_t size = MIN_BUFFER_SIZE(width, height, stride);
++    const uint64_t size =
++        MIN_BUFFER_SIZE(width * kModeBpp[mode], height, stride);
+     ok &= (size <= buf->size);
+     ok &= (stride >= width * kModeBpp[mode]);
+     ok &= (buf->rgba != NULL);
+-- 
+2.19.1
+
