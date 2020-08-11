@@ -1,6 +1,5 @@
-git_url: http://git.chromium.org/webm/libwebp.git
-version_control: git
-src_repo: http://git.chromium.org/webm/libwebp.git
-tag_prefix: "^v"
+version_control: github
+src_repo: webmproject/libwebp
+tag_prefix: ^v
 seperator: "."
 
