@@ -1,10 +1,10 @@
 Name:          libwebp
 Version:       1.1.0
-Release:       1
+Release:       2
 URL:           https://webmproject.org/
 Summary:       Library and tools for the WebP graphics format
 License:       BSD
-Source0:       https://downloads.webmproject.org/releases/webp/%{name}-%{version}.tar.gz
+Source0:       http://downloads.webmproject.org/releases/webp/%{name}-%{version}.tar.gz
 
 Patch6000:     libwebp-freeglut.patch
 
@@ -111,6 +111,9 @@ cp swig/*.jar swig/*.so %{buildroot}/%{_libdir}/%{name}-java/
 %{_mandir}/man*/*
 
 %changelog
+* Thu Sep 10 2020 zhanzhimin <zhanzhimin@huawei.com> - 1.1.0-2
+- update Source
+
 * Wed Apr 15 2020 fengtao<fengtao40@huawei.com> - 1.1.0-1
 - Type:enhancement
 - ID:NA
