@@ -1,6 +1,6 @@
 Name:          libwebp
-Version:       1.2.1
-Release:       2
+Version:       1.3.0
+Release:       1
 URL:           http://www.linuxfromscratch.org/blfs/view/svn/general/libwebp.html
 Summary:       Library and tools for the WebP graphics format
 License:       BSD
@@ -90,13 +90,14 @@ cp swig/*.jar swig/*.so %{buildroot}/%{_libdir}/%{name}-java/
 
 %files -n %{name}
 %defattr(-,root,root)
-%doc README AUTHORS
+%doc README.md AUTHORS
 %license COPYING
 %{_libdir}/*.so.*
 
 %files devel
 %defattr(-,root,root)
 %{_libdir}/%{name}*.so
+%{_libdir}/libsharpyuv.so
 %{_includedir}/*
 %{_libdir}/*.a
 %{_libdir}/pkgconfig/*
@@ -111,6 +112,9 @@ cp swig/*.jar swig/*.so %{buildroot}/%{_libdir}/%{name}-java/
 %{_mandir}/man*/*
 
 %changelog
+* Fri Feb 03 2023 zhouwenpei <zhouwenpei1@h-partners.com> - 1.3.0-1
+- update to 1.3.0
+
 * Wed Oct 26 2022 zhouwenpei <zhouwenpei1@h-partners.com> - 1.2.1-2
 - Rebuild for next release
 
