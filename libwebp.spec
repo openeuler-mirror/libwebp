@@ -1,6 +1,6 @@
 Name:          libwebp
 Version:       1.3.0
-Release:       1
+Release:       2
 URL:           http://www.linuxfromscratch.org/blfs/view/svn/general/libwebp.html
 Summary:       Library and tools for the WebP graphics format
 License:       BSD
@@ -66,12 +66,12 @@ swig -ignoremissing -I../src -java \
     -outdir java/com/google/webp \
     -o libwebp_java_wrap.c libwebp.swig
 
-gcc %{__global_ldflags} %{optflags} -shared \
-    -I/usr/lib/jvm/java/include \
-    -I/usr/lib/jvm/java/include/linux \
-    -I../src \
-    -L../src/.libs -lwebp libwebp_java_wrap.c \
-    -o libwebp_jni.so
+%toolchain %{__global_ldflags} %{optflags} -shared \
+           -I/usr/lib/jvm/java/include \
+           -I/usr/lib/jvm/java/include/linux \
+           -I../src \
+           -L../src/.libs -lwebp libwebp_java_wrap.c \
+           -o libwebp_jni.so
 
 cd java
 javac com/google/webp/libwebp.java
@@ -112,6 +112,9 @@ cp swig/*.jar swig/*.so %{buildroot}/%{_libdir}/%{name}-java/
 %{_mandir}/man*/*
 
 %changelog
+* Mon May 22 2023 Xiaoya Huang <huangxiaoya@iscas.ac.cn> - 1.3.0-2
+- Fix CC compiler support
+
 * Fri Feb 03 2023 zhouwenpei <zhouwenpei1@h-partners.com> - 1.3.0-1
 - update to 1.3.0
 
